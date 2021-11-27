@@ -1,0 +1,87 @@
+{-# STDLIB_VERSION 5 #-}
+{-# CONTENT_TYPE DAPP #-}
+{-# SCRIPT_TYPE ACCOUNT #-}
+
+func priceKey(asset: String) = {
+  asset + "_price"
+}
+
+func ownerKey(asset: String) = {
+  asset + "_owner"
+}
+
+func tryGetInteger(key: String) = {
+  let val = match getInteger(this, key) {
+    case b:Int => b
+    case _ => 0
+  }
+  val
+}
+
+func tryGetString(key: String) = {
+  let val = match getString(this, key) {
+    case b:String => b
+    case _ => ""
+  }
+  val
+}
+
+@Callable(i)
+func offerForSale(price: Int) = {
+  let firstPayment = i.payments[0].value()
+
+  let assetId = match (firstPayment.assetId) {
+    case id:ByteVector => id
+    case w:Unit => throw("Asset is not NFT")
+  }
+
+  let assetIdStr = toBase58String(assetId)
+
+  let asset = match assetInfo(assetId) {
+    case a:Asset => a
+    case _ => throw("Error getting information about asset")
+  }
+
+  if (asset.quantity != 1 && asset.decimals != 0 && asset.reissuable) then {
+    throw("Asset is not NFT")
+  } else {
+    [
+      IntegerEntry(priceKey(assetIdStr), price),
+      StringEntry(ownerKey(assetIdStr), toBase58String(i.caller.bytes))
+    ]
+  }
+}
+
+@Callable(i)
+func buy(assetStr: String) = {
+  let price = tryGetInteger(priceKey(assetStr))
+
+  let ownerStr = tryGetString(ownerKey(assetStr))
+  let owner = match addressFromString(ownerStr) {
+    case a:Address => a 
+    case _ => throw("Address parsing error")
+  }
+
+  let firstPayment = i.payments[0].value()
+
+  let firstPaymentBool = match (firstPayment.assetId) {
+    case t:ByteVector => true
+    case w:Unit => false
+  }
+
+  if (price == 0) then {
+    throw("This NFT is not for sale")
+  } else if (firstPaymentBool) then {
+    throw("Payment must be in Waves tokens only")
+  } else if (firstPayment.amount < price) then {
+    throw("Insufficient funds")
+  } else {
+    [
+      ScriptTransfer(i.caller, 1, fromBase58String(assetStr)),
+      ScriptTransfer(owner, price, unit)
+    ]
+  }
+}
+
+@Verifier(tx)
+func verify() = sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
