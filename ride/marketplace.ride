@@ -78,7 +78,28 @@ func buy(assetStr: String) = {
   } else {
     [
       ScriptTransfer(i.caller, 1, fromBase58String(assetStr)),
-      ScriptTransfer(owner, price, unit)
+      ScriptTransfer(owner, price, unit),
+      DeleteEntry(priceKey(assetStr)),
+      DeleteEntry(ownerKey(assetStr))
+    ]
+  }
+}
+
+@Callable(i)
+func nftNoLongerForSale(assetStr: String) = {
+  let ownerStr = tryGetString(ownerKey(assetStr))
+  let owner = match addressFromString(ownerStr) {
+    case a:Address => a 
+    case _ => throw("Address parsing error")
+  }
+
+  if (ownerStr != toBase58String(i.caller.bytes)) then {
+    throw("The calling address is not the owner of the NFT token")
+  } else {
+    [
+      ScriptTransfer(i.caller, 1, fromBase58String(assetStr)),
+      DeleteEntry(priceKey(assetStr)),
+      DeleteEntry(ownerKey(assetStr))
     ]
   }
 }
