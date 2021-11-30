@@ -86,7 +86,7 @@ func buy(assetStr: String) = {
 }
 
 @Callable(i)
-func nftNoLongerForSale(assetStr: String) = {
+func cancelSelling(assetStr: String) = {
   let ownerStr = tryGetString(ownerKey(assetStr))
   let owner = match addressFromString(ownerStr) {
     case a:Address => a 
