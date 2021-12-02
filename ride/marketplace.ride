@@ -10,6 +10,10 @@ func ownerKey(asset: String) = {
   asset + "_owner"
 }
 
+func issuerKey(asset: String) = {
+  asset + "_issuer"
+}
+
 func tryGetInteger(key: String) = {
   let val = match getInteger(this, key) {
     case b:Int => b
@@ -47,7 +51,8 @@ func offerForSale(price: Int) = {
   } else {
     [
       IntegerEntry(priceKey(assetIdStr), price),
-      StringEntry(ownerKey(assetIdStr), toBase58String(i.caller.bytes))
+      StringEntry(ownerKey(assetIdStr), toBase58String(i.caller.bytes)),
+      StringEntry(issuerKey(assetIdStr), toBase58String(asset.issuer.bytes))
     ]
   }
 }
@@ -76,11 +81,13 @@ func buy(assetStr: String) = {
   } else if (firstPayment.amount < price) then {
     throw("Insufficient funds")
   } else {
+    let fee = (price / 100) * 5
     [
       ScriptTransfer(i.caller, 1, fromBase58String(assetStr)),
-      ScriptTransfer(owner, price, unit),
+      ScriptTransfer(owner, price - fee, unit),
       DeleteEntry(priceKey(assetStr)),
-      DeleteEntry(ownerKey(assetStr))
+      DeleteEntry(ownerKey(assetStr)),
+      DeleteEntry(issuerKey(assetStr))
     ]
   }
 }
@@ -99,7 +106,8 @@ func cancelSelling(assetStr: String) = {
     [
       ScriptTransfer(i.caller, 1, fromBase58String(assetStr)),
       DeleteEntry(priceKey(assetStr)),
-      DeleteEntry(ownerKey(assetStr))
+      DeleteEntry(ownerKey(assetStr)),
+      DeleteEntry(issuerKey(assetStr))
     ]
   }
 }
