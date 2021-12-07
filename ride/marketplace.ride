@@ -14,6 +14,14 @@ func issuerKey(asset: String) = {
   asset + "_issuer"
 }
 
+func nameKey(asset: String) = {
+  asset + "_name"
+}
+
+func descriptionKey(asset: String) = {
+  asset + "_description"
+}
+
 func tryGetInteger(key: String) = {
   let val = match getInteger(this, key) {
     case b:Int => b
@@ -52,7 +60,9 @@ func offerForSale(price: Int) = {
     [
       IntegerEntry(priceKey(assetIdStr), price),
       StringEntry(ownerKey(assetIdStr), toBase58String(i.caller.bytes)),
-      StringEntry(issuerKey(assetIdStr), toBase58String(asset.issuer.bytes))
+      StringEntry(issuerKey(assetIdStr), toBase58String(asset.issuer.bytes)),
+      StringEntry(nameKey(assetIdStr), asset.name),
+      StringEntry(descriptionKey(assetIdStr), asset.description)
     ]
   }
 }
@@ -87,7 +97,9 @@ func buy(assetStr: String) = {
       ScriptTransfer(owner, price - fee, unit),
       DeleteEntry(priceKey(assetStr)),
       DeleteEntry(ownerKey(assetStr)),
-      DeleteEntry(issuerKey(assetStr))
+      DeleteEntry(issuerKey(assetStr)),
+      DeleteEntry(nameKey(assetStr)),
+      DeleteEntry(descriptionKey(assetStr))
     ]
   }
 }
@@ -107,7 +119,9 @@ func cancelSelling(assetStr: String) = {
       ScriptTransfer(i.caller, 1, fromBase58String(assetStr)),
       DeleteEntry(priceKey(assetStr)),
       DeleteEntry(ownerKey(assetStr)),
-      DeleteEntry(issuerKey(assetStr))
+      DeleteEntry(issuerKey(assetStr)),
+      DeleteEntry(nameKey(assetStr)),
+      DeleteEntry(descriptionKey(assetStr))
     ]
   }
 }
