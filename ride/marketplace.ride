@@ -86,6 +86,8 @@ func buy(assetStr: String) = {
 
   if (price == 0) then {
     throw("This NFT is not for sale")
+  } else if (ownerStr == toBase58String(i.caller.bytes)) then {
+    throw("Owner cannot buy his NTF")
   } else if (firstPaymentBool) then {
     throw("Payment must be in Waves tokens only")
   } else if (firstPayment.amount < price) then {
