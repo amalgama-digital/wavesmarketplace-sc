@@ -18,6 +18,10 @@ func addressKey(nameUrl: String) = {
   nameUrl + "_address"
 }
 
+func statusKey(nameUrl: String) = {
+  nameUrl + "_status"
+}
+
 @Callable(inv)
 func verifyCollection( nameUrl: String, name: String, description: String, hash: String) = {
   
@@ -25,7 +29,8 @@ func verifyCollection( nameUrl: String, name: String, description: String, hash:
     StringEntry(nameKey(nameUrl), name),
     StringEntry(descriptionKey(nameUrl), description),
     StringEntry(addressKey(nameUrl), toBase58String(inv.caller.bytes)),
-    StringEntry(ipfsHashKey(nameUrl), hash)
+    StringEntry(ipfsHashKey(nameUrl), hash),
+    StringEntry(statusKey(nameUrl), "VOITING")
   ]
 }
 
