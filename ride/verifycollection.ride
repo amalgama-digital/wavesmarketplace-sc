@@ -2,30 +2,30 @@
 {-# CONTENT_TYPE DAPP #-}
 {-# SCRIPT_TYPE ACCOUNT #-}
 
-func nameUrlKey(asset: String) = {
-  asset + "_nameUrl"
+func nameKey(nameUrl: String) = {
+  nameUrl + "_name"
 }
 
-func nameKey(asset: String) = {
-  asset + "_name"
+func descriptionKey(nameUrl: String) = {
+  nameUrl + "_description"
 }
 
-func descriptionKey(asset: String) = {
-  asset + "_description"
+func ipfsHashKey(nameUrl: String) = {
+  nameUrl + "_hash"
 }
 
-func ipfsHashKey(asset: String) = {
-  asset + "_hash"
+func addressKey(nameUrl: String) = {
+  nameUrl + "_address"
 }
 
 @Callable(inv)
 func verifyCollection( nameUrl: String, name: String, description: String, hash: String) = {
   
   [
-    StringEntry(nameUrlKey(toBase58String(inv.caller)), nameUrl),
-    StringEntry(nameKey(toBase58String(inv.caller)), name),
-    StringEntry(descriptionKey(toBase58String(inv.caller)), description),
-    StringEntry(descriptionKey(assetIdStr), asset.descriptio
+    StringEntry(nameKey(nameUrl), name),
+    StringEntry(descriptionKey(nameUrl), description),
+    StringEntry(addressKey(nameUrl), toBase58String(inv.caller.bytes)),
+    StringEntry(ipfsHashKey(nameUrl), hash)
   ]
 }
 
