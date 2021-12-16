@@ -34,16 +34,20 @@ func checkVote(numberVote: Int, voices: Int) = {
 
 @Callable(inv)
 func verifyCollection( nameUrl: String, name: String, description: String, hash: String) = {
-  
-  [
-    StringEntry(nameKey(nameUrl), name),
-    StringEntry(descriptionKey(nameUrl), description),
-    StringEntry(addressKey(nameUrl), toBase58String(inv.caller.bytes)),
-    StringEntry(ipfsHashKey(nameUrl), hash),
-    StringEntry(statusKey(nameUrl), "VOITING"),
-    IntegerEntry(voteKey(nameUrl), 0)
+  if(getStringValue(nameKey(nameUrl)) != "") then {
+    throw("This collection was create")
+  }
+  else { 
+    [
+      StringEntry(nameKey(nameUrl), name),
+      StringEntry(descriptionKey(nameUrl), description),
+      StringEntry(addressKey(nameUrl), toBase58String(inv.caller.bytes)),
+      StringEntry(ipfsHashKey(nameUrl), hash),
+      StringEntry(statusKey(nameUrl), "VOITING"),
+      IntegerEntry(voteKey(nameUrl), 0)
 
-  ]
+    ]
+  }
 }
 
 @Callable(inv)
