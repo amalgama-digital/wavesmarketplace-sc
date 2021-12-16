@@ -1,0 +1,34 @@
+{-# STDLIB_VERSION 5 #-}
+{-# CONTENT_TYPE DAPP #-}
+{-# SCRIPT_TYPE ACCOUNT #-}
+
+func nameUrlKey(asset: String) = {
+  asset + "_nameUrl"
+}
+
+func nameKey(asset: String) = {
+  asset + "_name"
+}
+
+func descriptionKey(asset: String) = {
+  asset + "_description"
+}
+
+func ipfsHashKey(asset: String) = {
+  asset + "_hash"
+}
+
+@Callable(inv)
+func verifyCollection( nameUrl: String, name: String, description: String, hash: String) = {
+  
+  [
+    StringEntry(nameUrlKey(toBase58String(inv.caller)), nameUrl),
+    StringEntry(nameKey(toBase58String(inv.caller)), name),
+    StringEntry(descriptionKey(toBase58String(inv.caller)), description),
+    StringEntry(descriptionKey(assetIdStr), asset.descriptio
+  ]
+}
+
+@Verifier(tx)
+func verify() = sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
+        
