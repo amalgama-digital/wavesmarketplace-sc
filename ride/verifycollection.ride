@@ -22,6 +22,16 @@ func statusKey(nameUrl: String) = {
   nameUrl + "_status"
 }
 
+func voteKey(nameUrl: String) = {
+  nameUrl + "_vote"
+}
+
+func checkVote(numberVote: Int, voices: Int) = {
+  if(numberVote / 2 < voices)
+  then "VERIFY"
+  else "VOITING"
+}
+
 @Callable(inv)
 func verifyCollection( nameUrl: String, name: String, description: String, hash: String) = {
   
@@ -30,10 +40,28 @@ func verifyCollection( nameUrl: String, name: String, description: String, hash:
     StringEntry(descriptionKey(nameUrl), description),
     StringEntry(addressKey(nameUrl), toBase58String(inv.caller.bytes)),
     StringEntry(ipfsHashKey(nameUrl), hash),
-    StringEntry(statusKey(nameUrl), "VOITING")
+    StringEntry(statusKey(nameUrl), "VOITING"),
+    IntegerEntry(voteKey(nameUrl), 0)
+
   ]
 }
 
+@Callable(inv)
+func vote(nameUrl: String) = {  
+  let listVoiting = split(getStringValue("voting member"), ",")
+  if(!containsElement(listVoiting, toBase58String(inv.caller.bytes)))
+    then {
+      throw("You can't vote")
+    }
+  else {
+    let voices = getIntegerValue(voteKey(nameUrl)) + 1
+    [
+      IntegerEntry(voteKey(nameUrl), voices),
+      StringEntry(statusKey(nameUrl), checkVote(size(listVoiting), voices))
+    ]
+  }
+}
+
+
 @Verifier(tx)
 func verify() = sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
-        
