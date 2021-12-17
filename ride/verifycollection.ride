@@ -68,10 +68,12 @@ func vote(nameUrl: String) = {
 
 @Callable(inv)
 func addVoting(address: String) = {
+  let listVoiting = split(getStringValue("voting_member"), ",")
   if(toBase58String(inv.caller.bytes) != toBase58String(this.bytes)) then {
     throw("You don't owner")
+  } else if(containsElement(listVoiting, address)) then {
+    throw("This address was added")
   } else {
-    let listVoiting = split(getStringValue("voting_member"), ",")
     let list = cons(address, listVoiting)
     [
       StringEntry("voting member", makeString(list, ","))
@@ -81,13 +83,19 @@ func addVoting(address: String) = {
 
 @Callable(inv)
 func removeVoting(address: String) = {
+  let listVoiting = split(getStringValue("voting_member"), ",")
   if(toBase58String(inv.caller.bytes) != toBase58String(this.bytes)) then {
     throw("You don't owner")
+  } else if(!containsElement(listVoiting, address)) then {
+    throw("This address wasn't added")
   } else {
-    let listVoiting = split(getStringValue("voting_member"), ",")
-    let list = cons(address, listVoiting)
+    let index = match indexOf(listVoiting, address) {
+        case t:Int => t 
+        case _ => 0
+      } 
+    let list = removeByIndex(listVoiting, index)
     [
-      StringEntry("voting_member", makeString(list, ","))
+      StringEntry("voting member", makeString(list, ","))
     ]
   }
 }
