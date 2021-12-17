@@ -52,7 +52,7 @@ func verifyCollection( nameUrl: String, name: String, description: String, hash:
 
 @Callable(inv)
 func vote(nameUrl: String) = {  
-  let listVoiting = split(getStringValue("voting member"), ",")
+  let listVoiting = split(getStringValue("voting_member"), ",")
   if(!containsElement(listVoiting, toBase58String(inv.caller.bytes))) then {
     throw("You can't vote")
   } else if (statusKey(nameUrl) == "VERIFY") then {
@@ -66,6 +66,31 @@ func vote(nameUrl: String) = {
   }
 }
 
+@Callable(inv)
+func addVoting(address: String) = {
+  if(toBase58String(inv.caller.bytes) != toBase58String(this.bytes)) then {
+    throw("You don't owner")
+  } else {
+    let listVoiting = split(getStringValue("voting_member"), ",")
+    let list = cons(address, listVoiting)
+    [
+      StringEntry("voting member", makeString(list, ","))
+    ]
+  }
+}
+
+@Callable(inv)
+func removeVoting(address: String) = {
+  if(toBase58String(inv.caller.bytes) != toBase58String(this.bytes)) then {
+    throw("You don't owner")
+  } else {
+    let listVoiting = split(getStringValue("voting_member"), ",")
+    let list = cons(address, listVoiting)
+    [
+      StringEntry("voting_member", makeString(list, ","))
+    ]
+  }
+}
 
 @Verifier(tx)
 func verify() = sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
