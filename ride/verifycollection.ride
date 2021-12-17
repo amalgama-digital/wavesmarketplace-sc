@@ -53,11 +53,11 @@ func verifyCollection( nameUrl: String, name: String, description: String, hash:
 @Callable(inv)
 func vote(nameUrl: String) = {  
   let listVoiting = split(getStringValue("voting member"), ",")
-  if(!containsElement(listVoiting, toBase58String(inv.caller.bytes)))
-    then {
-      throw("You can't vote")
-    }
-  else {
+  if(!containsElement(listVoiting, toBase58String(inv.caller.bytes))) then {
+    throw("You can't vote")
+  } else if (statusKey(nameUrl) == "VERIFY") then {
+    throw("Voting was ended")
+  } else {
     let voices = getIntegerValue(voteKey(nameUrl)) + 1
     [
       IntegerEntry(voteKey(nameUrl), voices),
