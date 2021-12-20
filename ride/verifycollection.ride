@@ -29,7 +29,7 @@ func voteKey(nameUrl: String) = {
 func checkVote(numberVote: Int, voices: Int) = {
   if(numberVote / 2 < voices)
   then "VERIFY"
-  else "VOITING"
+  else "VOTING"
 }
 
 @Callable(inv)
@@ -43,7 +43,7 @@ func verifyCollection( nameUrl: String, name: String, description: String, hash:
       StringEntry(descriptionKey(nameUrl), description),
       StringEntry(addressKey(nameUrl), toBase58String(inv.caller.bytes)),
       StringEntry(ipfsHashKey(nameUrl), hash),
-      StringEntry(statusKey(nameUrl), "VOITING"),
+      StringEntry(statusKey(nameUrl), "VOTING"),
       IntegerEntry(voteKey(nameUrl), 0)
 
     ]
@@ -52,8 +52,8 @@ func verifyCollection( nameUrl: String, name: String, description: String, hash:
 
 @Callable(inv)
 func vote(nameUrl: String) = {  
-  let listVoiting = split(getStringValue("voting_member"), ",")
-  if(!containsElement(listVoiting, toBase58String(inv.caller.bytes))) then {
+  let listVoting = split(getStringValue("voting_member"), ",")
+  if(!containsElement(listVoting, toBase58String(inv.caller.bytes))) then {
     throw("You can't vote")
   } else if (statusKey(nameUrl) == "VERIFY") then {
     throw("Voting was ended")
@@ -61,20 +61,20 @@ func vote(nameUrl: String) = {
     let voices = getIntegerValue(voteKey(nameUrl)) + 1
     [
       IntegerEntry(voteKey(nameUrl), voices),
-      StringEntry(statusKey(nameUrl), checkVote(size(listVoiting), voices))
+      StringEntry(statusKey(nameUrl), checkVote(size(listVoting), voices))
     ]
   }
 }
 
 @Callable(inv)
 func addVoting(address: String) = {
-  let listVoiting = split(getStringValue("voting_member"), ",")
+  let listVoting = split(getStringValue("voting_member"), ",")
   if(toBase58String(inv.caller.bytes) != toBase58String(this.bytes)) then {
     throw("You don't owner")
-  } else if(containsElement(listVoiting, address)) then {
+  } else if(containsElement(listVoting, address)) then {
     throw("This address was added")
   } else {
-    let list = cons(address, listVoiting)
+    let list = cons(address, listVoting)
     [
       StringEntry("voting member", makeString(list, ","))
     ]
@@ -83,17 +83,17 @@ func addVoting(address: String) = {
 
 @Callable(inv)
 func removeVoting(address: String) = {
-  let listVoiting = split(getStringValue("voting_member"), ",")
+  let listVoting = split(getStringValue("voting_member"), ",")
   if(toBase58String(inv.caller.bytes) != toBase58String(this.bytes)) then {
     throw("You don't owner")
-  } else if(!containsElement(listVoiting, address)) then {
+  } else if(!containsElement(listVoting, address)) then {
     throw("This address wasn't added")
   } else {
-    let index = match indexOf(listVoiting, address) {
+    let index = match indexOf(listVoting, address) {
       case t:Int => t 
       case _ => 0
     } 
-    let list = removeByIndex(listVoiting, index)
+    let list = removeByIndex(listVoting, index)
     [
       StringEntry("voting member", makeString(list, ","))
     ]
