@@ -33,11 +33,10 @@ func checkVote(numberVote: Int, voices: Int) = {
 }
 
 @Callable(inv)
-func verifyCollection( nameUrl: String, name: String, description: String, hash: String) = {
+func verifyCollection(nameUrl: String, name: String, description: String, hash: String) = {
   if(getStringValue(nameKey(nameUrl)) != "") then {
     throw("This collection was create")
-  }
-  else { 
+  } else {
     [
       StringEntry(nameKey(nameUrl), name),
       StringEntry(descriptionKey(nameUrl), description),
@@ -76,7 +75,7 @@ func addVoting(address: String) = {
   } else {
     let list = cons(address, listVoting)
     [
-      StringEntry("voting member", makeString(list, ","))
+      StringEntry("voting_member", makeString(list, ","))
     ]
   }
 }
@@ -92,10 +91,10 @@ func removeVoting(address: String) = {
     let index = match indexOf(listVoting, address) {
       case t:Int => t 
       case _ => 0
-    } 
+    }
     let list = removeByIndex(listVoting, index)
     [
-      StringEntry("voting member", makeString(list, ","))
+      StringEntry("voting_member", makeString(list, ","))
     ]
   }
 }
