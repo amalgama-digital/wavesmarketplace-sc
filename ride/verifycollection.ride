@@ -34,7 +34,7 @@ func checkVote(numberVote: Int, voices: Int) = {
 
 @Callable(inv)
 func verifyCollection(nameUrl: String, name: String, description: String, hash: String) = {
-  if(getStringValue(nameKey(nameUrl)) != "") then {
+  if(getString(nameKey(nameUrl)).isDefined()) then {
     throw("This collection was create")
   } else {
     [
