@@ -43,7 +43,7 @@ func verifyCollection(nameUrl: String, name: String, description: String, hash: 
       StringEntry(addressKey(nameUrl), toBase58String(inv.caller.bytes)),
       StringEntry(ipfsHashKey(nameUrl), hash),
       StringEntry(statusKey(nameUrl), "VOTING"),
-      IntegerEntry(voteKey(nameUrl), 0)
+      StringEntry(voteKey(nameUrl), "")
 
     ]
   }
@@ -51,16 +51,20 @@ func verifyCollection(nameUrl: String, name: String, description: String, hash: 
 
 @Callable(inv)
 func vote(nameUrl: String) = {  
-  let listVoting = split(getStringValue("voting_member"), ",")
-  if(!containsElement(listVoting, toBase58String(inv.caller.bytes))) then {
+  let votingMember = split(getStringValue("voting_member"), ",")
+  let listVoted = split(getStringValue(voteKey(nameUrl)), ",")
+  if(!containsElement(votingMember, toBase58String(inv.caller.bytes))) then {
     throw("You can't vote")
+  } else if (containsElement(listVoted, toBase58String(inv.caller.bytes))) then {
+    throw("You voted already")
   } else if (statusKey(nameUrl) == "VERIFY") then {
     throw("Voting was ended")
   } else {
-    let voices = getIntegerValue(voteKey(nameUrl)) + 1
+    let list = cons(toBase58String(inv.caller.bytes), listVoted)
+    let voices = size(listVoted)
     [
-      IntegerEntry(voteKey(nameUrl), voices),
-      StringEntry(statusKey(nameUrl), checkVote(size(listVoting), voices))
+      StringEntry(voteKey(nameUrl), makeString(list, ",")),
+      StringEntry(statusKey(nameUrl), checkVote(size(votingMember), voices))
     ]
   }
 }
