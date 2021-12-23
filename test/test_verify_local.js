@@ -1,5 +1,8 @@
 const {expect, assert } = require("chai")
-const { SeedVote1 } = require("./config")
+
+/*
+Working with a local node is described in the How to Build, Deploy and Test a Waves RIDE dApp (opens new window)article.
+*/
 
 const wvs = 10**8
 describe('test in testnet: verifycollection.ride', () => {
