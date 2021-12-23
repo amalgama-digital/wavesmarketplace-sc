@@ -12,6 +12,7 @@ const Constants = {
   }
 module.exports = Constants
 */
+
 describe('test in testnet: verifycollection.ride', () => {
     //Voties include address with seed phrase: SeedVotes1, SeedVotes2, SeedVotes3
     const Voties = "3N7yQLHUBnWxogAKAkdYyx11gz8X7PWfAnH,3NC2359r28GxfTsUuRbA4fyPuoWuqqc7EUj,3MtYePm61jmLLdxoNex73HBwxxHBfXfsLHp,3Mq9Z4oXtW6kmEXKL3rYp6YUczRL6cCT2f6"
