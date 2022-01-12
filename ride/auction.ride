@@ -1,0 +1,780 @@
+{-# STDLIB_VERSION 5 #-}
+{-# SCRIPT_TYPE ACCOUNT #-}
+{-# CONTENT_TYPE DAPP #-}
+let unitTest = false
+
+let oracleFee = value(addressFromString("3PAjrTqYLgFG24kRwiyU34noumz4pz2kXPK"))
+
+let signDapp = value(addressFromString("3P9fNN7wT6u2BpKJ3t2EdQi2pY9opUE6ett"))
+
+let feeReceiver = "3PFacsvuU9sn2ZstaLCWKWn48yT1vfARRRU"
+
+let userDapp = value(addressFromString("3PGSWDgad4RtceQYXBpq2x73mXLRJYLRqRP"))
+
+let whitelistDapp = value(addressFromString("3PRFTPm4hbUhxhjQdE8cGaXGAfzGLq4va8H"))
+
+let signAssetId = base58'9sQutD5HnRvjM1uui5cVC4w9xkMPAfYEV8ymug3Mon2Y'
+
+let usdnAssetId = base58'DG2xFkPdDwKUoBkzGAhQtLpSGzfXLiCYPEzeKH2Ad24p'
+
+let wavesAssetId = base58''
+
+let chris = "3P4JutBKW6pADm91FxMfGL3EYxKJtWYsWfX"
+
+let joep = "3PLKXPJigZJ4aVqpMGx5ajyPYmA4Zcry9Tb"
+
+let signCut = 7
+
+let usdnWaveCut = 10
+
+let defaultLicence = "bafybeifuyo4pqu54ismqgtb6e4h6kkvgx7zg4u3zibh2r7y6mb64i7bzza/licence.pdf"
+
+let defaultHashLicence = "a87758c354e30a9e78fb84fa3a0010a5090ab20df0be11ad45b5720cc187e639"
+
+let dappRunning = valueOrElse(getBoolean(userDapp, "conf_dapp_is_running"), true)
+
+let maintenanceMSG = valueOrElse(getString(userDapp, "conf_maintenance_msg"), "")
+
+let userSuspended = "SUSPENDED"
+
+let userRemoved = "REMOVED"
+
+let userUnregistered = "UNREGISTERED"
+
+let userAllowed = "ALLOWED"
+
+func getStringByKey (key: String) = {
+    valueOrElse(getString(this, key), "")
+}
+
+func getIntegerByKeyFromOracle (key: String) = {
+    valueOrErrorMessage(getInteger(oracleFee, key), "Integer undefine or 0 in oracle")
+}
+
+func getIntegerByKey (key: String) = {
+    valueOrElse(getInteger(this, key), 0)
+}
+
+func checkWhitelist (key: String) = {
+    valueOrElse(getInteger(whitelistDapp, key), 0)
+}
+
+func getBooleanByKey (key: String) = {
+    valueOrElse(getBoolean(this, key), false)
+}
+
+let currentCertificationPrice = getIntegerByKeyFromOracle(("certification_fee_" + toBase58String(signAssetId)))
+
+func checkSignCertificate (signID: String, Owner: String, sha256Hash: String) = {
+    match getString(signDapp, ((("data_fc_" + signID) + "_") + Owner)) {
+        case a: String => 
+            if (contains(a, sha256Hash))
+                then true
+                else false
+        case _ => 
+            false
+    }
+}
+
+func validateCID (cid: String) = {
+    if (contains(cid, "/"))
+    then if (if ((76 > size(cid)))
+        then (size(split(cid, "/")[0]) == 59)
+        else false)
+        then (16 > size(split(cid, "/")[1]))
+        else false
+    else false
+}
+
+func validateHash (hash: String) = {
+    (size(hash) == 64)
+}
+
+func keyUserStatus (caller: String) = {
+    ("user_status_" + caller)
+}
+
+func keyDate (caller: String, artId: String) = {
+    ((("art_date_" + artId) + "_") + caller)
+}
+
+func keyName (caller: String, artId: String) = {
+    ((("art_name_" + artId) + "_") + caller)
+}
+
+func keyDesc (caller: String, artId: String) = {
+    ((("art_desc_" + artId) + "_") + caller)
+}
+
+func keyDisplayCid (caller: String, artId: String) = {
+    ((("art_display_cid_" + artId) + "_") + caller)
+}
+
+func keyExportHash (caller: String, artId: String) = {
+    ((("art_export_hash_" + artId) + "_") + caller)
+}
+
+func keyExportCid (caller: String, artId: String) = {
+    ((("art_export_cid_" + artId) + "_") + caller)
+}
+
+func keyMaxMint (caller: String, artId: String) = {
+    ((("art_maxmint_" + artId) + "_") + caller)
+}
+
+func keySignID (caller: String, artId: String) = {
+    ((("art_signid_" + artId) + "_") + caller)
+}
+
+func keyIssued (caller: String, artId: String) = {
+    ((("art_issued_" + artId) + "_") + caller)
+}
+
+func keyOnSale (caller: String, artId: String) = {
+    ((("art_onsale_" + artId) + "_") + caller)
+}
+
+func keyLicenceHash (caller: String, artId: String) = {
+    ((("art_licence_hash_" + artId) + "_") + caller)
+}
+
+func keyLicenceCid (caller: String, artId: String) = {
+    ((("art_licence_cid_" + artId) + "_") + caller)
+}
+
+func keyTags (caller: String, artId: String) = {
+    ((("art_tags_" + artId) + "_") + caller)
+}
+
+func keyType (caller: String, artId: String) = {
+    ((("art_type_" + artId) + "_") + caller)
+}
+
+func keyNote (caller: String, artId: String) = {
+    ((("art_note_" + artId) + "_") + caller)
+}
+
+func keyCrawler (caller: String, artId: String) = {
+    ((("art_crawler_cid_" + artId) + "_") + caller)
+}
+
+func keyPrice (caller: String, artId: String) = {
+    ((("art_price_" + artId) + "_") + caller)
+}
+
+func keyEndSale (caller: String, artId: String) = {
+    ((("art_endsale_" + artId) + "_") + caller)
+}
+
+func keyAssetIdAccepted (caller: String, artId: String) = {
+    ((("art_assetAccepted_" + artId) + "_") + caller)
+}
+
+func keyFlag (caller: String, artId: String) = {
+    ((("art_flag_" + artId) + "_") + caller)
+}
+
+func keyHashByTxidAddr (caller: String, txid: String) = {
+    ((("get_hashbytxidaddr_" + txid) + "_") + caller)
+}
+
+func keyOwnerByHash (sha256Hash: String) = {
+    ("get_owner_by_hash_" + sha256Hash)
+}
+
+func keyidBySignid (caller: String, signId: String) = {
+    ((("get_artidbysignid_" + signId) + "_") + caller)
+}
+
+func keyTxidByHashOwner (sha256Hash: String, caller: String) = {
+    ("get_txid_by_hash_owner_" + toBase58String(sha256_16Kb(toBytes((sha256Hash + caller)))))
+}
+
+func validateAllCID (cidDisplay: String, cidExport: String, cidLicence: String) = {
+    if (!(validateCID(cidDisplay)))
+    then throw("Wrong Display CID")
+    else if (!(validateCID(cidExport)))
+        then throw("Wrong Export CID")
+        else if (if ((cidLicence != ""))
+            then !(validateCID(cidLicence))
+            else false)
+            then throw("Wrong Licence CID")
+            else true
+}
+
+func validateAllHash (sha256Export: String, sha256Licence: String) = {
+    if (!(validateHash(sha256Export)))
+    then throw("Export Hash 64 char. max")
+    else if (!(validateHash(sha256Licence)))
+        then throw("Licence Hash 64 char. max")
+        else true
+}
+
+func validateString (str: String, max: Int) = {
+    if ((size(str) == 0))
+    then throw("Field cannot be is empty")
+    else if ((size(str) > max))
+        then throw((str + " is too long"))
+        else true
+}
+
+func validateUser (caller: String) = {
+    let userStatus = valueOrElse(getString(userDapp, keyUserStatus(caller)), userUnregistered)
+    if (if ((userStatus == userUnregistered))
+        then true
+        else (userStatus == userAllowed))
+        then "Register this account first with Account tab"
+        else if ((userStatus == userSuspended))
+            then "Account suspended"
+            else if ((userStatus == userRemoved))
+                then "Account removed"
+                else ""
+}
+
+
+func setLIcence (cidLicence: String, sha256Licence: String) = {
+    let cid = if ((size(cidLicence) == 0))
+        then defaultLicence
+        else cidLicence
+    let hash = if ((size(sha256Licence) == 0))
+        then defaultHashLicence
+        else sha256Licence
+    (cid, hash)
+}
+
+
+func validateArtworkData (caller: String, cidDisplay: String, cidExport: String, licenceCID: String, sha256Export: String, licenceHash: String, name: String, description: String, tags: String) = {
+    let checkUser = validateUser(caller)
+    if ((checkUser != ""))
+        then throw(checkUser)
+        else if ((size(cidDisplay) == 0))
+            then throw("Display CID cannot be empty")
+            else if (!(validateAllCID(cidDisplay, cidExport, licenceCID)))
+                then throw("Problem with CID")
+                else if (!(validateAllHash(sha256Export, licenceHash)))
+                    then throw("Problem with Hashes")
+                    else if (!(validateString(name, 100)))
+                        then throw("100 Char. max name")
+                        else if (!(validateString(description, 1000)))
+                            then throw("1000 Char. max description")
+                            else if ((size(split(tags, ",")) > 5))
+                                then throw("5 tags max.")
+                                else ""
+    }
+
+
+func isPayment(i: Invocation) = {
+    if ((size(i.payments) == 0))
+    then throw("No payment attached")
+    else {
+        let payment = value(i.payments[0])
+        let amount = value(payment.amount)
+        (payment, amount)
+    }
+}
+
+func validatePayment(i: Invocation) = {
+    let t091979233 = isPayment(i)
+    let payment = t091979233._1
+    let amount = t091979233._2
+    let assetId = if (if (isDefined(payment.assetId))
+        then (payment.assetId == signAssetId)
+        else false)
+        then payment.assetId
+        else throw("Only SIGN token accepted as transaction fee")
+    if ((amount != currentCertificationPrice))
+        then throw(("Payment amount should be " + toString(currentCertificationPrice)))
+        else (amount, assetId)
+}
+
+func isArtMinted (addrToUse: String, artId: String) = {
+    let val = match getInteger(this, keyIssued(addrToUse, artId)) {
+        case b: Int => 
+            if ((b != 0))
+                then true
+                else false
+        case _ => 
+            false
+    }
+    val
+}
+
+func validatePriceAssetId(i: Invocation, priceAssetId: String, artworkPrice: Int) = {
+    let t098269862 = isPayment(i)
+    let payment = t098269862._1
+    let amount = t098269862._2
+    let assetId = if (!(isDefined(payment.assetId)))
+        then unit
+        else if (if ((size(priceAssetId) > 0))
+            then (toBase58String(value(payment.assetId)) == priceAssetId)
+            else false)
+            then payment.assetId
+            else throw("Wrong asset id")
+    if (if ((assetId == unit))
+        then (priceAssetId != "")
+        else false)
+        then throw("Wrong asset id")
+        else if ((artworkPrice != amount))
+            then throw("Payment don't match")
+            else (amount, assetId)
+}
+
+
+func acceptedAssetIds (assetId: String) = {
+    if (if (if (if ((assetId != toBase58String(signAssetId)))
+    then (assetId != toBase58String(wavesAssetId))
+    else false)
+    then (assetId != "WAVES")
+    else false)
+    then (assetId != toBase58String(usdnAssetId))
+    else false)
+    then throw("Only SIGN, USDN or WAVES accepted")
+    else true
+}
+
+func validateMinSell (assetId: String, price: Int) = {
+    let minSellWaves = if (unitTest)
+        then 10
+        else getIntegerByKeyFromOracle("waves_min_sell")
+    let minSellUsdn = 1000000
+    let minSellSign = if (unitTest)
+        then 1
+        else (currentCertificationPrice * 2)
+    if (if (if (if (if ((assetId == toBase58String(usdnAssetId)))
+        then (minSellUsdn > price)
+        else false)
+        then (price != 0)
+        else false)
+        then true
+        else if (if ((assetId == toBase58String(signAssetId)))
+            then (minSellSign > price)
+            else false)
+            then (price != 0)
+            else false)
+        then true
+        else if (if (if ((assetId == toBase58String(wavesAssetId)))
+            then true
+            else (assetId == "WAVES"))
+            then (minSellWaves > price)
+            else false)
+            then (price != 0)
+            else false)
+        then throw("Wrong minimum sell price")
+        else true
+}
+
+
+func getBidAssetId (assetId: String) = {
+    if ((assetId == "WAVES"))
+    then unit
+    else fromBase58String(assetId)
+}
+
+func getPriceAssetIdFromBid (bidDataKey: String) = {
+    let bidData = getStringByKey((bidDataKey + "_OPEN"))
+    if ((bidData == ""))
+        then throw("Bid not found")
+        else {
+            let bidDataArr = split(bidData, "_")
+            let bidAmount = parseIntValue(bidDataArr[1])
+            let bidAssetId = getBidAssetId(bidDataArr[0])
+            if ((0 >= bidAmount))
+                then throw("Wrong amount")
+                else (bidAmount, bidAssetId)
+            }
+}
+
+func idCallerDate(i: Invocation) = {
+    if (!(dappRunning))
+    then throw(maintenanceMSG)
+    else (toBase58String(i.transactionId), toBase58String(i.caller.bytes), lastBlock.timestamp)
+}
+
+func buyMint (i: Invocation, artId: String, issuer: String, bidId: String, bidOwner: String) = {
+    let t01208712144 = idCallerDate(i)
+    let id = t01208712144._1
+    let caller = t01208712144._2
+    let date = t01208712144._3  
+    let isBid = if (if (if ((toBase58String(i.caller.bytes) == issuer))
+        then (bidOwner != "")
+        else false)
+        then (bidId != "")
+        else false)
+        then true
+        else false
+    let blockEnd = getIntegerByKey(keyEndSale(caller, artId))
+    if (if (if ((blockEnd != 0))
+        then (height >= blockEnd)
+        else false)
+        then !(isBid)
+        else false)
+        then throw("Sale ended.")
+        else {
+            let callerIsIssuer = (toBase58String(i.caller.bytes) == issuer)
+            let totalNFT = getIntegerByKey("total_nft_issued")
+            let signID = getStringByKey(keySignID(issuer, artId))
+            let artworkName = getStringByKey(keyName(issuer, artId))
+            if ((artworkName == ""))
+                then throw("Art doesn't exist")
+                else {
+                    let isOnSale = getBooleanByKey(keyOnSale(issuer, artId))
+                    let amountSold = getIntegerByKey(keyIssued(issuer, artId))
+                    let artworkPrice = if (callerIsIssuer)
+                        then (currentCertificationPrice * 2)
+                        else getIntegerByKey(keyPrice(issuer, artId))
+                    let priceAssetId = if (callerIsIssuer)
+                        then toBase58String(signAssetId)
+                        else getStringByKey(keyAssetIdAccepted(issuer, artId))
+                    let maxCanSell = getIntegerByKey(keyMaxMint(issuer, artId))
+                    if (if (if (!(isBid))
+                        then !(callerIsIssuer)
+                        else false)
+                        then if (if ((0 >= artworkPrice))
+                            then true
+                            else !(isOnSale))
+                            then true
+                            else (0 >= maxCanSell)
+                        else false)
+                        then throw("Art not for sale")
+                        else if (if (if (!(isBid))
+                            then callerIsIssuer
+                            else false)
+                            then (0 >= maxCanSell)
+                            else false)
+                            then throw("Max issuable not set")
+                            else {
+                                let checkUser = validateUser(issuer)
+                                if (if (isBid)
+                                    then (checkUser != "")
+                                    else false)
+                                    then throw(checkUser)
+                                    else {
+                                        let bidDataKey = ((((((("bid_" + artId) + "_") + issuer) + "_") + bidOwner) + "_") + bidId)
+                                        let t01389514051 = if (isBid)
+                                            then getPriceAssetIdFromBid(bidDataKey)
+                                            else validatePriceAssetId(i, priceAssetId, artworkPrice)
+                                        let amount = t01389514051._1
+                                        let assetId = t01389514051._2
+                                        let isWhitelisted = checkWhitelist(issuer)
+                                        let cut = if ((isWhitelisted > height))
+                                            then 0
+                                            else if ((assetId == signAssetId))
+                                                then signCut
+                                                else usdnWaveCut
+                                        let amountForSign = fraction(amount, cut, 100)
+                                        let amountForCreator = (amount - amountForSign)
+                                        if ((amountSold == maxCanSell))
+                                            then throw("Art sold out")
+                                            else {
+                                                let newAmountSold = (amountSold + 1)
+                                                let issueMeta = ((((((((((("Creator: " + issuer) + ", ArtID: ") + artId) + ", SignID: ") + signID) + ", Artwork name: ") + artworkName) + ", Issue: ") + toString(newAmountSold)) + "/") + toString(maxCanSell))
+                                                let issueNFT = Issue(("SA_" + toString((totalNFT + 1))), issueMeta, 1, 0, false)
+                                                let idNFT = calculateAssetId(issueNFT)
+                                                let sellStatus = if (if ((newAmountSold == maxCanSell))
+                                                    then true
+                                                    else !(isOnSale))
+                                                    then false
+                                                    else true
+                                                let receiveNFT = if (if (if ((caller == issuer))
+                                                    then (bidOwner != "")
+                                                    else false)
+                                                    then (bidId != "")
+                                                    else false)
+                                                    then addressFromStringValue(bidOwner)
+                                                    else i.caller
+                                                let assetIdBid = if (!(isDefined(assetId)))
+                                                    then "WAVES"
+                                                    else toBase58String(value(assetId))
+                                                let bidData = getStringByKey((bidDataKey + "_OPEN"))
+                                                let bidDelOld = DeleteEntry((bidDataKey + "_OPEN"))
+                                                let bidUpdate = StringEntry((bidDataKey + "_CLOSED"), ((bidData + "_") + toString(date)))
+                                                let soldKey = ((((((("art_sold_" + toString(newAmountSold)) + "_of_") + toString(maxCanSell)) + "_") + artId) + "_") + issuer)
+                                                let soldValue = if (!(isBid))
+                                                    then ((((((((((caller + "_") + toString(date)) + "_") + id) + "_") + toString(artworkPrice)) + "_") + priceAssetId) + "_") + toBase58String(idNFT))
+                                                    else ((((((((((toString(receiveNFT) + "_") + toString(date)) + "_") + id) + "_") + toString(amount)) + "_") + assetIdBid) + "_") + toBase58String(idNFT))
+                                                let soldData = StringEntry(soldKey, soldValue)
+                                                let buyRes = [IntegerEntry(keyIssued(issuer, artId), newAmountSold), StringEntry(("nft_" + toBase58String(idNFT)), soldKey), IntegerEntry("total_nft_issued", (totalNFT + 1)), IntegerEntry(keyEndSale(issuer, artId), 0), BooleanEntry(keyOnSale(issuer, artId), sellStatus), issueNFT, ScriptTransfer(Address(fromBase58String(issuer)), amountForCreator, assetId), ScriptTransfer(Address(fromBase58String(feeReceiver)), amountForSign, assetId), ScriptTransfer(receiveNFT, 1, idNFT)]
+                                                if (isBid)
+                                                    then [soldData, bidUpdate, bidDelOld] ++ buyRes
+                                                    else soldData :: buyRes
+                                                }
+                                        }
+                                }
+                    }
+            }
+}
+
+
+@Callable(i)
+func addArtwork (sha256Hash: String, signID: String, name: String, description: String, tags: String, type: String, cidDisplay: String, sha256Export: String, cidExport: String, sha256Licence: String, cidLicence: String, crawler: String) = {
+    let t01667916720 = idCallerDate(i)
+    let artId = t01667916720._1
+    let caller = t01667916720._2
+    let date = t01667916720._3  
+    if (!(validateHash(sha256Hash)))
+        then throw("Hash should be 64 characters maximum")
+        else {
+            let t01682116890 = setLIcence(cidLicence, sha256Licence)
+            let licenceCID = t01682116890._1
+            let licenceHash = t01682116890._2
+            let validateArtwork = validateArtworkData(caller, cidDisplay, cidExport, licenceCID, sha256Export, licenceHash, name, description, tags)
+            if ((validateArtwork != ""))
+                then throw("Something went wrong!")
+                else {
+                    let t01710917151 = validatePayment(i)
+                    let amount = t01710917151._1
+                    let assetId = t01710917151._2
+                    if (!(isDefined(amount)))
+                        then throw("Something went wrong")
+                        else {
+                            let entryExist = getStringByKey(keyTxidByHashOwner(sha256Hash, caller))
+                            if ((entryExist != ""))
+                                then throw("You already added it")
+                                else {
+                                    let hashExist = getStringByKey(keyOwnerByHash(sha256Hash))
+                                    if ((hashExist != ""))
+                                        then throw("Hash already registered")
+                                        else {
+                                            let isSignCertified = checkSignCertificate(signID, caller, sha256Hash)
+                                            if (!(isSignCertified))
+                                                then throw("Sign Certificate not found for this address.")
+                                                else [StringEntry(keyOwnerByHash(sha256Hash), caller), StringEntry(keyTxidByHashOwner(sha256Hash, caller), artId), IntegerEntry(keyDate(caller, artId), date), StringEntry(keyName(caller, artId), name), StringEntry(keyDesc(caller, artId), description), StringEntry(keyDisplayCid(caller, artId), cidDisplay), StringEntry(keyExportCid(caller, artId), cidExport), StringEntry(keyExportHash(caller, artId), sha256Export), StringEntry(keyLicenceHash(caller, artId), licenceHash), StringEntry(keyLicenceCid(caller, artId), licenceCID), StringEntry(keyType(caller, artId), type), StringEntry(keyTags(caller, artId), tags), IntegerEntry(keyMaxMint(caller, artId), 0), StringEntry(keySignID(caller, artId), signID), IntegerEntry(keyIssued(caller, artId), 0), BooleanEntry(keyOnSale(caller, artId), false), StringEntry(keyidBySignid(caller, signID), artId), StringEntry(keyHashByTxidAddr(caller, artId), sha256Hash), StringEntry(keyCrawler(caller, artId), crawler), ScriptTransfer(Address(fromBase58String(feeReceiver)), amount, assetId)]
+                                            }
+                                    }
+                            }
+                    }
+            }
+    }
+
+
+
+@Callable(i)
+func updateArtwork (txid: String, name: String, description: String, tags: String, type: String, cidDisplay: String, sha256Export: String, cidExport: String, sha256Licence: String, cidLicence: String, crawler: String) = if (!(dappRunning))
+    then throw(maintenanceMSG)
+    else {
+        let caller = toBase58String(i.caller.bytes)
+        let t01988319952 = setLIcence(cidLicence, sha256Licence)
+        let licenceCID = t01988319952._1
+        let licenceHash = t01988319952._2
+        let validateArtwork = validateArtworkData(caller, cidDisplay, cidExport, licenceCID, sha256Export, licenceHash, name, description, tags)
+        if ((validateArtwork != ""))
+            then throw("Something went wrong!")
+            else {
+                let entryExist = getStringByKey(keyName(caller, txid))
+                if ((entryExist == ""))
+                    then throw("Entry not found")
+                    else {
+                        let flag = getStringByKey(keyFlag(caller, txid))
+                        if ((flag == "ILLEGAL"))
+                            then throw("Cannot update ILLEGAL artwork")
+                            else if (!(isArtMinted(caller, txid)))
+                                then [StringEntry(keyName(caller, txid), name), StringEntry(keyDesc(caller, txid), description), StringEntry(keyDisplayCid(caller, txid), cidDisplay), StringEntry(keyExportCid(caller, txid), cidExport), StringEntry(keyExportHash(caller, txid), sha256Export), StringEntry(keyLicenceCid(caller, txid), licenceCID), StringEntry(keyLicenceHash(caller, txid), licenceHash), StringEntry(keyTags(caller, txid), tags), StringEntry(keyType(caller, txid), type), StringEntry(keyCrawler(caller, txid), crawler)]
+                                else throw("Already minted")
+                        }
+                }
+        }
+
+
+
+@Callable(i)
+func flagArtwork (artId: String, addr: String, flag: String, note: String) = {
+    let t02137721410 = idCallerDate(i)
+    let id = t02137721410._1
+    let caller = t02137721410._2
+    if (containsElement([chris, toString(this)], caller))
+        then if (containsElement(["CONSENT", "", "CHANGE_REQUIRED", "FLAGGED", "ILLEGAL"], flag))
+            then [StringEntry(keyFlag(addr, artId), flag), StringEntry(keyNote(addr, artId), note)]
+            else throw(("Unknow status " + flag))
+        else throw("You are not allowed")
+    }
+
+
+
+@Callable(i)
+func deleteArtwork (artId: String, addr: String) = {
+    let t02184621879 = idCallerDate(i)
+    let id = t02184621879._1
+    let caller = t02184621879._2
+    let addrToUse = if (containsElement([chris, joep, toString(this)], caller))
+        then addr
+        else caller
+    let entryExist = valueOrErrorMessage(getStringByKey(keyName(addrToUse, artId)), "No art matching for this address")
+    if ((entryExist == ""))
+        then throw("No art matching for this address")
+        else {
+            let sha256Hash = getStringByKey(keyHashByTxidAddr(addrToUse, artId))
+            if ((sha256Hash == ""))
+                then throw("No art hash matching for this address")
+                else {
+                    let signID = getStringByKey(keySignID(addrToUse, artId))
+                    if ((signID == ""))
+                        then throw("No SIGN ID matching")
+                        else {
+                            let dataToDelete = [DeleteEntry(keyDate(addrToUse, artId)), DeleteEntry(keyName(addrToUse, artId)), DeleteEntry(keyDesc(addrToUse, artId)), DeleteEntry(keyDisplayCid(addrToUse, artId)), DeleteEntry(keyExportCid(addrToUse, artId)), DeleteEntry(keyExportHash(addrToUse, artId)), DeleteEntry(keyLicenceHash(addrToUse, artId)), DeleteEntry(keyLicenceCid(addrToUse, artId)), DeleteEntry(keyType(addrToUse, artId)), DeleteEntry(keyTags(addrToUse, artId)), DeleteEntry(keyMaxMint(addrToUse, artId)), DeleteEntry(keySignID(addrToUse, artId)), DeleteEntry(keyIssued(addrToUse, artId)), DeleteEntry(keyOnSale(addrToUse, artId)), DeleteEntry(keyFlag(addrToUse, artId)), DeleteEntry(keyPrice(addrToUse, artId)), DeleteEntry(keyAssetIdAccepted(addrToUse, artId)), DeleteEntry(keyOwnerByHash(sha256Hash)), DeleteEntry(keyidBySignid(addrToUse, signID)), DeleteEntry(keyTxidByHashOwner(sha256Hash, addrToUse)), DeleteEntry(keyEndSale(addrToUse, artId)), DeleteEntry(keyNote(addrToUse, artId)), DeleteEntry(keyCrawler(addrToUse, artId))]
+                            if (!(isArtMinted(addrToUse, artId)))
+                                then if (!(dappRunning))
+                                    then throw(maintenanceMSG)
+                                    else dataToDelete
+                                else if (containsElement([chris, toString(this)], caller))
+                                    then dataToDelete
+                                    else throw("Art already minted, you cannot delete it")
+                            }
+                    }
+            }
+    }
+
+
+
+@Callable(i)
+func sellArtwork (artId: String, price: Int, maxMint: Int, assetId: String, blockEnd: Int) = {
+    let t02465224685 = idCallerDate(i)
+    let id = t02465224685._1
+    let caller = t02465224685._2
+    let artworkName = getStringByKey(keyName(caller, artId))
+    if ((artworkName == ""))
+        then throw("This art doesn't match your account")
+        else {
+            let flag = getStringByKey(keyFlag(caller, artId))
+            if (containsElement(["CHANGE_REQUIRED", "FLAGGED", "ILLEGAL"], flag))
+                then throw("Flagged artwork")
+                else {
+                    let bidNbr = getIntegerByKey(("current_bidamount_" + artId))
+                    if ((0 > blockEnd))
+                        then throw("Negative end")
+                        else if (if ((blockEnd > 0))
+                            then if ((maxMint != 1))
+                                then true
+                                else (price != 0)
+                            else false)
+                            then throw("Timed offer only allowed for unique edition and offer only")
+                            else {
+                                let baseHeight = if ((blockEnd == 0))
+                                    then 0
+                                    else height
+                                if (!(acceptedAssetIds(assetId)))
+                                    then throw("Something went wrong!")
+                                    else if (!(validateMinSell(assetId, price)))
+                                        then throw("Something went wrong!")
+                                        else {
+                                            let checkUser = validateUser(caller)
+                                            if ((checkUser != ""))
+                                                then throw(checkUser)
+                                                else {
+                                                    let amountSold = getIntegerByKey(keyIssued(caller, artId))
+                                                    let maxCanSell = getIntegerByKey(keyMaxMint(caller, artId))
+                                                    if ((maxMint > 100))
+                                                        then throw("100 editions max per artwork")
+                                                        else if (if ((amountSold != 0))
+                                                            then (amountSold == maxCanSell)
+                                                            else false)
+                                                            then throw("Max edition reached.")
+                                                            else if (if ((amountSold > 0))
+                                                                then (maxCanSell != maxMint)
+                                                                else false)
+                                                                then throw("Cannot change maximum issuable anymore")
+                                                                else if (if ((bidNbr > 0))
+                                                                    then (maxCanSell != maxMint)
+                                                                    else false)
+                                                                    then throw("Cannot change maximum issuable with active orders")
+                                                                    else {
+                                                                        let sellStatus = if (if ((price > 0))
+                                                                            then (maxMint > 0)
+                                                                            else false)
+                                                                            then true
+                                                                            else false
+                                                                            [
+                                                                            BooleanEntry(keyOnSale(caller, artId), sellStatus),
+                                                                            IntegerEntry(keyPrice(caller, artId), price),
+                                                                            IntegerEntry(keyMaxMint(caller, artId), maxMint),
+                                                                            StringEntry(keyAssetIdAccepted(caller, artId), assetId),
+                                                                            IntegerEntry(keyEndSale(caller, artId), (baseHeight + blockEnd))
+                                                                            ]
+                                                                        }
+                                                    }
+                                            }
+                                }
+                    }
+            }
+    }
+
+@Callable(i)
+func buyArtwork (artId: String, issuer: String) = {
+    buyMint(i, artId, issuer, "", "")
+}
+
+
+@Callable(i)
+func setBid (artId: String, issuer: String) = {
+    let t02694226980 = idCallerDate(i)
+    let id = t02694226980._1
+    let caller = t02694226980._2
+    let date = t02694226980._3
+    let t02698527021 = isPayment(i)
+    let payment = t02698527021._1
+    let amount = t02698527021._2
+    let assetId = if (!(isDefined(payment.assetId)))
+        then "WAVES"
+        else toBase58String(value(payment.assetId))
+    let blockEnd = getIntegerByKey(keyEndSale(issuer, artId))
+    if (if ((blockEnd != 0))
+        then (height >= blockEnd)
+        else false)
+        then throw("Sale ended.")
+        else {
+            let bidNbr = getIntegerByKey(("current_bidamount_" + artId))
+            if (!(acceptedAssetIds(assetId)))
+                then throw("asset not accepted")
+                else if (!(validateMinSell(assetId, amount)))
+                    then throw("Wrong min sell")
+                    else {
+                        let amountSold = getIntegerByKey(keyIssued(issuer, artId))
+                        let maxCanSell = getIntegerByKey(keyMaxMint(issuer, artId))
+                        if ((0 >= maxCanSell))
+                            then throw("No max edition set for this artwork")
+                            else if ((amountSold >= maxCanSell))
+                                then throw("Sold out, you cannot bid")
+                                else [StringEntry((((((((("bid_" + artId) + "_") + issuer) + "_") + caller) + "_") + id) + "_OPEN"), ((((assetId + "_") + toString(amount)) + "_") + toString(date))), IntegerEntry(("current_bidamount_" + artId), (bidNbr + 1))]
+                        }
+            }
+    }
+
+
+
+@Callable(i)
+func acceptBid (artId: String, issuer: String, bidId: String, bidOwner: String) = {
+    let caller = toBase58String(i.caller.bytes)
+    if ((caller != issuer))
+        then throw("You cannot do this action")
+        else buyMint(i, artId, issuer, bidId, bidOwner)
+}
+
+
+
+@Callable(i)
+func cancelBid (artId: String, issuer: String, bidId: String, bidOwner: String) = {
+    let t02844828507 = idCallerDate(i)
+    let id = t02844828507._1
+    let caller = t02844828507._2
+    let date = t02844828507._3
+    if (if ((caller != bidOwner))
+        then (caller != issuer)
+        else false)
+        then throw("You cannot do this action")
+        else {
+            let returnMoneyTo = if ((caller == issuer))
+                then bidOwner
+                else caller
+            let bidNbr = getIntegerByKey(("current_bidamount_" + artId))
+            let bidDataKey = ((((((("bid_" + artId) + "_") + issuer) + "_") + bidOwner) + "_") + bidId)
+            let bidData = getStringByKey((bidDataKey + "_OPEN"))
+            if ((bidData == ""))
+                then throw("Bid not found")
+                else {
+                    let bidDataArr = split(bidData, "_")
+                    let assetId = getBidAssetId(bidDataArr[0])
+                    let bidStatus = "CANCELED"
+[DeleteEntry((bidDataKey + "_OPEN")), StringEntry(((bidDataKey + "_") + bidStatus), ((bidData + "_") + toString(date))), IntegerEntry(("current_bidamount_" + artId), (bidNbr - 1)), ScriptTransfer(Address(fromBase58String(returnMoneyTo)), parseIntValue(bidDataArr[1]), assetId)]
+                    }
+            }
+    }
+
