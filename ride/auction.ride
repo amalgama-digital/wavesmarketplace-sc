@@ -274,9 +274,9 @@ func isPayment(i: Invocation) = {
 }
 
 func validatePayment(i: Invocation) = {
-    let t091979233 = isPayment(i)
-    let payment = t091979233._1
-    let amount = t091979233._2
+    let temp = isPayment(i)
+    let payment = temp._1
+    let amount = temp._2
     let assetId = if (if (isDefined(payment.assetId))
         then (payment.assetId == signAssetId)
         else false)
@@ -300,9 +300,9 @@ func isArtMinted (addrToUse: String, artId: String) = {
 }
 
 func validatePriceAssetId(i: Invocation, priceAssetId: String, artworkPrice: Int) = {
-    let t098269862 = isPayment(i)
-    let payment = t098269862._1
-    let amount = t098269862._2
+    let temp = isPayment(i)
+    let payment = temp._1
+    let amount = temp._2
     let assetId = if (!(isDefined(payment.assetId)))
         then unit
         else if (if ((size(priceAssetId) > 0))
@@ -391,10 +391,10 @@ func idCallerDate(i: Invocation) = {
 }
 
 func buyMint (i: Invocation, artId: String, issuer: String, bidId: String, bidOwner: String) = {
-    let t01208712144 = idCallerDate(i)
-    let id = t01208712144._1
-    let caller = t01208712144._2
-    let date = t01208712144._3  
+    let temp = idCallerDate(i)
+    let id = temp._1
+    let caller = temp._2
+    let date = temp._3  
     let isBid = if (if (if ((toBase58String(i.caller.bytes) == issuer))
         then (bidOwner != "")
         else false)
@@ -450,11 +450,11 @@ func buyMint (i: Invocation, artId: String, issuer: String, bidId: String, bidOw
                                     then throw(checkUser)
                                     else {
                                         let bidDataKey = ((((((("bid_" + artId) + "_") + issuer) + "_") + bidOwner) + "_") + bidId)
-                                        let t01389514051 = if (isBid)
+                                        let priceTemp = if (isBid)
                                             then getPriceAssetIdFromBid(bidDataKey)
                                             else validatePriceAssetId(i, priceAssetId, artworkPrice)
-                                        let amount = t01389514051._1
-                                        let assetId = t01389514051._2
+                                        let amount = priceTemp._1
+                                        let assetId = priceTemp._2
                                         let isWhitelisted = checkWhitelist(issuer)
                                         let cut = if ((isWhitelisted > height))
                                             then 0
@@ -493,7 +493,16 @@ func buyMint (i: Invocation, artId: String, issuer: String, bidId: String, bidOw
                                                     then ((((((((((caller + "_") + toString(date)) + "_") + id) + "_") + toString(artworkPrice)) + "_") + priceAssetId) + "_") + toBase58String(idNFT))
                                                     else ((((((((((toString(receiveNFT) + "_") + toString(date)) + "_") + id) + "_") + toString(amount)) + "_") + assetIdBid) + "_") + toBase58String(idNFT))
                                                 let soldData = StringEntry(soldKey, soldValue)
-                                                let buyRes = [IntegerEntry(keyIssued(issuer, artId), newAmountSold), StringEntry(("nft_" + toBase58String(idNFT)), soldKey), IntegerEntry("total_nft_issued", (totalNFT + 1)), IntegerEntry(keyEndSale(issuer, artId), 0), BooleanEntry(keyOnSale(issuer, artId), sellStatus), issueNFT, ScriptTransfer(Address(fromBase58String(issuer)), amountForCreator, assetId), ScriptTransfer(Address(fromBase58String(feeReceiver)), amountForSign, assetId), ScriptTransfer(receiveNFT, 1, idNFT)]
+                                                let buyRes = [
+                                                    IntegerEntry(keyIssued(issuer, artId), newAmountSold),
+                                                    StringEntry(("nft_" + toBase58String(idNFT)), soldKey),
+                                                    IntegerEntry("total_nft_issued", (totalNFT + 1)),
+                                                    IntegerEntry(keyEndSale(issuer, artId), 0),
+                                                    BooleanEntry(keyOnSale(issuer, artId), sellStatus),
+                                                    issueNFT,
+                                                    ScriptTransfer(Address(fromBase58String(issuer)),amountForCreator, assetId),
+                                                    ScriptTransfer(Address(fromBase58String(feeReceiver)), amountForSign, assetId),
+                                                    ScriptTransfer(receiveNFT, 1, idNFT)]
                                                 if (isBid)
                                                     then [soldData, bidUpdate, bidDelOld] ++ buyRes
                                                     else soldData :: buyRes
@@ -507,23 +516,23 @@ func buyMint (i: Invocation, artId: String, issuer: String, bidId: String, bidOw
 
 @Callable(i)
 func addArtwork (sha256Hash: String, signID: String, name: String, description: String, tags: String, type: String, cidDisplay: String, sha256Export: String, cidExport: String, sha256Licence: String, cidLicence: String, crawler: String) = {
-    let t01667916720 = idCallerDate(i)
-    let artId = t01667916720._1
-    let caller = t01667916720._2
-    let date = t01667916720._3  
+    let temp = idCallerDate(i)
+    let artId = temp._1
+    let caller = temp._2
+    let date = temp._3  
     if (!(validateHash(sha256Hash)))
         then throw("Hash should be 64 characters maximum")
         else {
-            let t01682116890 = setLIcence(cidLicence, sha256Licence)
-            let licenceCID = t01682116890._1
-            let licenceHash = t01682116890._2
+            let licenceTemp = setLIcence(cidLicence, sha256Licence)
+            let licenceCID = licenceTemp._1
+            let licenceHash = licenceTemp._2
             let validateArtwork = validateArtworkData(caller, cidDisplay, cidExport, licenceCID, sha256Export, licenceHash, name, description, tags)
             if ((validateArtwork != ""))
                 then throw("Something went wrong!")
                 else {
-                    let t01710917151 = validatePayment(i)
-                    let amount = t01710917151._1
-                    let assetId = t01710917151._2
+                    let validTemp = validatePayment(i)
+                    let amount = validTemp._1
+                    let assetId = validTemp._2
                     if (!(isDefined(amount)))
                         then throw("Something went wrong")
                         else {
@@ -538,7 +547,27 @@ func addArtwork (sha256Hash: String, signID: String, name: String, description: 
                                             let isSignCertified = checkSignCertificate(signID, caller, sha256Hash)
                                             if (!(isSignCertified))
                                                 then throw("Sign Certificate not found for this address.")
-                                                else [StringEntry(keyOwnerByHash(sha256Hash), caller), StringEntry(keyTxidByHashOwner(sha256Hash, caller), artId), IntegerEntry(keyDate(caller, artId), date), StringEntry(keyName(caller, artId), name), StringEntry(keyDesc(caller, artId), description), StringEntry(keyDisplayCid(caller, artId), cidDisplay), StringEntry(keyExportCid(caller, artId), cidExport), StringEntry(keyExportHash(caller, artId), sha256Export), StringEntry(keyLicenceHash(caller, artId), licenceHash), StringEntry(keyLicenceCid(caller, artId), licenceCID), StringEntry(keyType(caller, artId), type), StringEntry(keyTags(caller, artId), tags), IntegerEntry(keyMaxMint(caller, artId), 0), StringEntry(keySignID(caller, artId), signID), IntegerEntry(keyIssued(caller, artId), 0), BooleanEntry(keyOnSale(caller, artId), false), StringEntry(keyidBySignid(caller, signID), artId), StringEntry(keyHashByTxidAddr(caller, artId), sha256Hash), StringEntry(keyCrawler(caller, artId), crawler), ScriptTransfer(Address(fromBase58String(feeReceiver)), amount, assetId)]
+                                                else [
+                                                    StringEntry(keyOwnerByHash(sha256Hash), caller),
+                                                    StringEntry(keyTxidByHashOwner(sha256Hash, caller), artId),
+                                                    IntegerEntry(keyDate(caller, artId), date),
+                                                    StringEntry(keyName(caller, artId), name),
+                                                    StringEntry(keyDesc(caller, artId), description),
+                                                    StringEntry(keyDisplayCid(caller, artId), cidDisplay),
+                                                    StringEntry(keyExportCid(caller, artId), cidExport),
+                                                    StringEntry(keyExportHash(caller, artId), sha256Export),
+                                                    StringEntry(keyLicenceHash(caller, artId), licenceHash),
+                                                    StringEntry(keyLicenceCid(caller, artId), licenceCID),
+                                                    StringEntry(keyType(caller, artId), type),
+                                                    StringEntry(keyTags(caller, artId), tags),
+                                                    IntegerEntry(keyMaxMint(caller, artId), 0),
+                                                    StringEntry(keySignID(caller, artId), signID),
+                                                    IntegerEntry(keyIssued(caller, artId), 0),
+                                                    BooleanEntry(keyOnSale(caller, artId), false),
+                                                    StringEntry(keyidBySignid(caller, signID), artId),
+                                                    StringEntry(keyHashByTxidAddr(caller, artId), sha256Hash),
+                                                    StringEntry(keyCrawler(caller, artId), crawler),
+                                                    ScriptTransfer(Address(fromBase58String(feeReceiver)), amount, assetId)]
                                             }
                                     }
                             }
@@ -553,9 +582,9 @@ func updateArtwork (txid: String, name: String, description: String, tags: Strin
     then throw(maintenanceMSG)
     else {
         let caller = toBase58String(i.caller.bytes)
-        let t01988319952 = setLIcence(cidLicence, sha256Licence)
-        let licenceCID = t01988319952._1
-        let licenceHash = t01988319952._2
+        let licenceTemp = setLIcence(cidLicence, sha256Licence)
+        let licenceCID = licenceTemp._1
+        let licenceHash = licenceTemp._2
         let validateArtwork = validateArtworkData(caller, cidDisplay, cidExport, licenceCID, sha256Export, licenceHash, name, description, tags)
         if ((validateArtwork != ""))
             then throw("Something went wrong!")
@@ -578,9 +607,9 @@ func updateArtwork (txid: String, name: String, description: String, tags: Strin
 
 @Callable(i)
 func flagArtwork (artId: String, addr: String, flag: String, note: String) = {
-    let t02137721410 = idCallerDate(i)
-    let id = t02137721410._1
-    let caller = t02137721410._2
+    let callerTemp = idCallerDate(i)
+    let id = callerTemp._1
+    let caller = callerTemp._2
     if (containsElement([chris, toString(this)], caller))
         then if (containsElement(["CONSENT", "", "CHANGE_REQUIRED", "FLAGGED", "ILLEGAL"], flag))
             then [StringEntry(keyFlag(addr, artId), flag), StringEntry(keyNote(addr, artId), note)]
@@ -592,9 +621,9 @@ func flagArtwork (artId: String, addr: String, flag: String, note: String) = {
 
 @Callable(i)
 func deleteArtwork (artId: String, addr: String) = {
-    let t02184621879 = idCallerDate(i)
-    let id = t02184621879._1
-    let caller = t02184621879._2
+    let callerTemp = idCallerDate(i)
+    let id = callerTemp._1
+    let caller = callerTemp._2
     let addrToUse = if (containsElement([chris, joep, toString(this)], caller))
         then addr
         else caller
@@ -610,7 +639,31 @@ func deleteArtwork (artId: String, addr: String) = {
                     if ((signID == ""))
                         then throw("No SIGN ID matching")
                         else {
-                            let dataToDelete = [DeleteEntry(keyDate(addrToUse, artId)), DeleteEntry(keyName(addrToUse, artId)), DeleteEntry(keyDesc(addrToUse, artId)), DeleteEntry(keyDisplayCid(addrToUse, artId)), DeleteEntry(keyExportCid(addrToUse, artId)), DeleteEntry(keyExportHash(addrToUse, artId)), DeleteEntry(keyLicenceHash(addrToUse, artId)), DeleteEntry(keyLicenceCid(addrToUse, artId)), DeleteEntry(keyType(addrToUse, artId)), DeleteEntry(keyTags(addrToUse, artId)), DeleteEntry(keyMaxMint(addrToUse, artId)), DeleteEntry(keySignID(addrToUse, artId)), DeleteEntry(keyIssued(addrToUse, artId)), DeleteEntry(keyOnSale(addrToUse, artId)), DeleteEntry(keyFlag(addrToUse, artId)), DeleteEntry(keyPrice(addrToUse, artId)), DeleteEntry(keyAssetIdAccepted(addrToUse, artId)), DeleteEntry(keyOwnerByHash(sha256Hash)), DeleteEntry(keyidBySignid(addrToUse, signID)), DeleteEntry(keyTxidByHashOwner(sha256Hash, addrToUse)), DeleteEntry(keyEndSale(addrToUse, artId)), DeleteEntry(keyNote(addrToUse, artId)), DeleteEntry(keyCrawler(addrToUse, artId))]
+                            let dataToDelete = [
+                                DeleteEntry(keyDate(addrToUse, artId)),
+                                DeleteEntry(keyName(addrToUse, artId)),
+                                DeleteEntry(keyDesc(addrToUse, artId)),
+                                DeleteEntry(keyDisplayCid(addrToUse, artId)),
+                                DeleteEntry(keyExportCid(addrToUse, artId)),
+                                DeleteEntry(keyExportHash(addrToUse, artId)),
+                                DeleteEntry(keyLicenceHash(addrToUse, artId)),
+                                DeleteEntry(keyLicenceCid(addrToUse, artId)),
+                                DeleteEntry(keyType(addrToUse, artId)),
+                                DeleteEntry(keyTags(addrToUse, artId)),
+                                DeleteEntry(keyMaxMint(addrToUse, artId)),
+                                DeleteEntry(keySignID(addrToUse, artId)),
+                                DeleteEntry(keyIssued(addrToUse, artId)),
+                                DeleteEntry(keyOnSale(addrToUse, artId)),
+                                DeleteEntry(keyFlag(addrToUse, artId)),
+                                DeleteEntry(keyPrice(addrToUse, artId)),
+                                DeleteEntry(keyAssetIdAccepted(addrToUse, artId)),
+                                DeleteEntry(keyOwnerByHash(sha256Hash)),
+                                DeleteEntry(keyidBySignid(addrToUse, signID)),
+                                DeleteEntry(keyTxidByHashOwner(sha256Hash, addrToUse)),
+                                DeleteEntry(keyEndSale(addrToUse, artId)),
+                                DeleteEntry(keyNote(addrToUse, artId)),
+                                DeleteEntry(keyCrawler(addrToUse, artId))
+                            ]
                             if (!(isArtMinted(addrToUse, artId)))
                                 then if (!(dappRunning))
                                     then throw(maintenanceMSG)
@@ -627,9 +680,9 @@ func deleteArtwork (artId: String, addr: String) = {
 
 @Callable(i)
 func sellArtwork (artId: String, price: Int, maxMint: Int, assetId: String, blockEnd: Int) = {
-    let t02465224685 = idCallerDate(i)
-    let id = t02465224685._1
-    let caller = t02465224685._2
+    let callerTemp = idCallerDate(i)
+    let id = callerTemp._1
+    let caller = callerTemp._2
     let artworkName = getStringByKey(keyName(caller, artId))
     if ((artworkName == ""))
         then throw("This art doesn't match your account")
@@ -705,13 +758,13 @@ func buyArtwork (artId: String, issuer: String) = {
 
 @Callable(i)
 func setBid (artId: String, issuer: String) = {
-    let t02694226980 = idCallerDate(i)
-    let id = t02694226980._1
-    let caller = t02694226980._2
-    let date = t02694226980._3
-    let t02698527021 = isPayment(i)
-    let payment = t02698527021._1
-    let amount = t02698527021._2
+    let callerTemp = idCallerDate(i)
+    let id = callerTemp._1
+    let caller = callerTemp._2
+    let date = callerTemp._3
+    let patmentTemp = isPayment(i)
+    let payment = patmentTemp._1
+    let amount = patmentTemp._2
     let assetId = if (!(isDefined(payment.assetId)))
         then "WAVES"
         else toBase58String(value(payment.assetId))
@@ -733,7 +786,9 @@ func setBid (artId: String, issuer: String) = {
                             then throw("No max edition set for this artwork")
                             else if ((amountSold >= maxCanSell))
                                 then throw("Sold out, you cannot bid")
-                                else [StringEntry((((((((("bid_" + artId) + "_") + issuer) + "_") + caller) + "_") + id) + "_OPEN"), ((((assetId + "_") + toString(amount)) + "_") + toString(date))), IntegerEntry(("current_bidamount_" + artId), (bidNbr + 1))]
+                                else [
+                                    StringEntry((((((((("bid_" + artId) + "_") + issuer) + "_") + caller) + "_") + id) + "_OPEN"), ((((assetId + "_") + toString(amount)) + "_") + toString(date))),
+                                    IntegerEntry(("current_bidamount_" + artId), (bidNbr + 1))]
                         }
             }
     }
@@ -752,10 +807,10 @@ func acceptBid (artId: String, issuer: String, bidId: String, bidOwner: String) 
 
 @Callable(i)
 func cancelBid (artId: String, issuer: String, bidId: String, bidOwner: String) = {
-    let t02844828507 = idCallerDate(i)
-    let id = t02844828507._1
-    let caller = t02844828507._2
-    let date = t02844828507._3
+    let callerTemp = idCallerDate(i)
+    let id = callerTemp._1
+    let caller = callerTemp._2
+    let date = callerTemp._3
     if (if ((caller != bidOwner))
         then (caller != issuer)
         else false)
@@ -773,7 +828,12 @@ func cancelBid (artId: String, issuer: String, bidId: String, bidOwner: String) 
                     let bidDataArr = split(bidData, "_")
                     let assetId = getBidAssetId(bidDataArr[0])
                     let bidStatus = "CANCELED"
-[DeleteEntry((bidDataKey + "_OPEN")), StringEntry(((bidDataKey + "_") + bidStatus), ((bidData + "_") + toString(date))), IntegerEntry(("current_bidamount_" + artId), (bidNbr - 1)), ScriptTransfer(Address(fromBase58String(returnMoneyTo)), parseIntValue(bidDataArr[1]), assetId)]
+                    [
+                    DeleteEntry((bidDataKey + "_OPEN")), 
+                    StringEntry(((bidDataKey + "_") + bidStatus), ((bidData + "_") + toString(date))),
+                    IntegerEntry(("current_bidamount_" + artId), (bidNbr - 1)),
+                    ScriptTransfer(Address(fromBase58String(returnMoneyTo)), parseIntValue(bidDataArr[1]), assetId)
+                    ]
                     }
             }
     }
