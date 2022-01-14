@@ -220,15 +220,13 @@ func validateString (str: String, max: Int) = {
 
 func validateUser (caller: String) = {
     let userStatus = valueOrElse(getString(userDapp, keyUserStatus(caller)), userUnregistered)
-    if (if ((userStatus == userUnregistered))
-        then true
-        else (userStatus == userAllowed))
-        then "Register this account first with Account tab"
-        else if ((userStatus == userSuspended))
-            then "Account suspended"
-            else if ((userStatus == userRemoved))
-                then "Account removed"
-                else ""
+    if ((userStatus == userUnregistered) || (userStatus == userAllowed))
+    then "Register this account first with Account tab"
+    else if ((userStatus == userSuspended))
+        then "Account suspended"
+        else if ((userStatus == userRemoved))
+            then "Account removed"
+            else ""
 }
 
 
@@ -277,9 +275,7 @@ func validatePayment(i: Invocation) = {
     let temp = isPayment(i)
     let payment = temp._1
     let amount = temp._2
-    let assetId = if (if (isDefined(payment.assetId))
-        then (payment.assetId == signAssetId)
-        else false)
+    let assetId = if (isDefined(payment.assetId) && (payment.assetId == signAssetId))
         then payment.assetId
         else throw("Only SIGN token accepted as transaction fee")
     if ((amount != currentCertificationPrice))
@@ -305,29 +301,22 @@ func validatePriceAssetId(i: Invocation, priceAssetId: String, artworkPrice: Int
     let amount = temp._2
     let assetId = if (!(isDefined(payment.assetId)))
         then unit
-        else if (if ((size(priceAssetId) > 0))
-            then (toBase58String(value(payment.assetId)) == priceAssetId)
-            else false)
-            then payment.assetId
-            else throw("Wrong asset id")
-    if (if ((assetId == unit))
-        then (priceAssetId != "")
-        else false)
-        then throw("Wrong asset id")
-        else if ((artworkPrice != amount))
-            then throw("Payment don't match")
-            else (amount, assetId)
+        else if ((size(priceAssetId) > 0) && (toBase58String(value(payment.assetId)) == priceAssetId))
+        then payment.assetId
+        else throw("Wrong asset id")
+    if ((assetId == unit) && (priceAssetId != ""))
+    then throw("Wrong asset id")
+    else if ((artworkPrice != amount))
+        then throw("Payment don't match")
+        else (amount, assetId)
 }
 
 
 func acceptedAssetIds (assetId: String) = {
-    if (if (if (if ((assetId != toBase58String(signAssetId)))
-    then (assetId != toBase58String(wavesAssetId))
-    else false)
-    then (assetId != "WAVES")
-    else false)
-    then (assetId != toBase58String(usdnAssetId))
-    else false)
+    if ((assetId != toBase58String(signAssetId)) && 
+        (assetId != toBase58String(wavesAssetId)) && 
+        (assetId != "WAVES") && 
+        (assetId != toBase58String(usdnAssetId)))
     then throw("Only SIGN, USDN or WAVES accepted")
     else true
 }
@@ -352,11 +341,9 @@ func validateMinSell (assetId: String, price: Int) = {
             then (price != 0)
             else false)
         then true
-        else if (if (if ((assetId == toBase58String(wavesAssetId)))
-            then true
-            else (assetId == "WAVES"))
-            then (minSellWaves > price)
-            else false)
+        else if (((assetId == toBase58String(wavesAssetId)) || 
+                (assetId == "WAVES")) && 
+                (minSellWaves > price))
             then (price != 0)
             else false)
         then throw("Wrong minimum sell price")
