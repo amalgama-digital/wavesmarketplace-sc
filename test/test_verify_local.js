@@ -1,7 +1,8 @@
 const {expect, assert } = require("chai")
 
 /*
-Working with a local node is described in the How to Build, Deploy and Test a Waves RIDE dApp (opens new window)article.
+Working with a local node is described in the How to Build, Deploy and Test a Waves RIDE dApp (opens new window)article
+https://habr.com/ru/company/waves/blog/459773/
 */
 
 const wvs = 10**8
@@ -46,7 +47,7 @@ describe('test in testnet: verifycollection.ride', () => {
         await waitForTx(dataTx.id)
     })
       
-    it('Test func verifyCollection(nameUrl: String, name: String, description: String, hash: String)', async () => {
+    xit('Test func verifyCollection(nameUrl: String, name: String, description: String, hash: String)', async () => {
         const verify = invokeScript({
             fee: 900000, 
             dApp: address(accounts.Deployer), 
@@ -76,7 +77,7 @@ describe('test in testnet: verifycollection.ride', () => {
         await waitForTx(verify.id)
     })
 
-    it('Test func vote(nameUrl: String)', async () => {
+    xit('Test func vote(nameUrl: String)', async () => {
         const verify1 = invokeScript({
             fee: 900000, 
             dApp: address(accounts.Deployer), 
@@ -86,7 +87,7 @@ describe('test in testnet: verifycollection.ride', () => {
                     "type": "string", 
                     "value": nameURL
                     }
-                ]}
+                ]},
             }, accounts.SeedVote1)
         await broadcast(verify1)
         await waitForTx(verify1.id)
@@ -127,7 +128,7 @@ describe('test in testnet: verifycollection.ride', () => {
         expect(data.value).equal("VERIFY")   
     })
 
-    it('Test func removeVoting(address: String)', async () => {
+    xit('Test func removeVoting(address: String)', async () => {
         const verify1 = invokeScript({
             fee: 900000, 
             dApp: address(accounts.Deployer), 
@@ -146,7 +147,7 @@ describe('test in testnet: verifycollection.ride', () => {
 
     })
 
-    it('Test func addVoting(address: String)', async () => {
+    xit('Test func addVoting(address: String)', async () => {
         const Voties = "3N7yQLHUBnWxogAKAkdYyx11gz8X7PWfAnH" + ',' + address(accounts.SeedVote1) + ',' + address(accounts.SeedVote2) + ',' + address(accounts.SeedVote3)
         const verify1 = invokeScript({
             fee: 900000, 
