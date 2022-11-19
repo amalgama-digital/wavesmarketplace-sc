@@ -13,7 +13,7 @@
     const dappSeed = env.SEED; // Or use seed phrase from surfboard.config.json
     const ssTx = setScript({
         script,
-        // additionalFee: 400000 // Uncomment to raise fee in case of redeployment
+        additionalFee: 400000 // Uncomment to raise fee in case of redeployment
     }, dappSeed);
     await broadcast(ssTx);
     await waitForTx(ssTx.id);
