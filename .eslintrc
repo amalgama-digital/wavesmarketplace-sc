@@ -1,0 +1,32 @@
+{
+    "extends": "airbnb-base",
+    "globals": {
+        "artifacts": true,
+        "contract": true,
+        "web3": true,
+        "assert": true,
+        "it": true,
+        "before": true,
+        "beforeEach": true,
+        "describe": true,
+        // Waves Ride
+        "setupAccounts": true,
+        "compile": true,
+        "file": true,
+        "setScript": true,
+        "accounts": true,
+        "broadcast": true,
+        "waitForTx": true,
+        "invokeScript": true,
+        "data": true,
+        "address": true,
+        "accountDataByKey": true
+
+    },
+    "rules": {
+        "strict": 0,
+        "func-names": "off",
+        "indent": ["error", 4],
+        "quote-props": ["error", "as-needed", { "unnecessary": false }]
+    }
+}
