@@ -47,7 +47,7 @@ describe('test in testnet: verifycollection.ride', () => {
         await broadcast(dataTx);
         await waitForTx(dataTx.id);
     });
-      
+
     xit('Test func verifyCollection(nameUrl: String, name: String, description: String, hash: String)', async () => {
         const verify = invokeScript({
             fee: 900000,
