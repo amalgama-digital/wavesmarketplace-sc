@@ -53,8 +53,9 @@ func offerForSale(price: Int) = {
     case a:Asset => a
     case _ => throw("Error getting information about asset")
   }
-
-  if (asset.quantity != 1 && asset.decimals != 0 && asset.reissuable) then {
+  if (firstPayment.amount != 1) then {
+    throw("Inccorect payment: amount NFT != 1")
+  } else if (asset.quantity != 1 && asset.decimals != 0 && asset.reissuable) then {
     throw("Asset is not NFT")
   } else {
     [

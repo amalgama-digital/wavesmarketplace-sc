@@ -48,7 +48,7 @@ describe('test in testnet: verifycollection.ride', () => {
         await waitForTx(dataTx.id);
     });
 
-    it('Test func verifyCollection(nameUrl: String, name: String, description: String, hash: String)', async () => {
+    xit('Test func verifyCollection(nameUrl: String, name: String, description: String, hash: String)', async () => {
         const verify = invokeScript({
             fee: 900000,
             dApp: address(accounts.Deployer),
@@ -78,52 +78,49 @@ describe('test in testnet: verifycollection.ride', () => {
         await waitForTx(verify.id);
     });
 
-    it('Test func vote(nameUrl: String)', async () => {
-        const tx1 = invokeScript({
-            fee: 900000,
-            dApp: address(accounts.Deployer),
-            call: {
-                function: 'vote',
-                args: [{
-                    'type': 'string',
-                    'value': nameURL,
-                }],
-            },
-        }, accounts.SeedVote1);
+    xit('Test func vote(nameUrl: String)', async () => {
+        const verify1 = invokeScript({
+            fee: 900000, 
+            dApp: address(accounts.Deployer), 
+            call:{function:"vote", 
+                args:[
+                    {
+                    "type": "string", 
+                    "value": nameURL
+                    }
+                ]},
+            }, accounts.SeedVote1)
+        await broadcast(verify1)
+        await waitForTx(verify1.id)
+        var data = await accountDataByKey(nameURL + "_status", address(accounts.Deployer))
+        expect(data.value).equal("VOTING")   
 
-        await broadcast(tx1);
-        await waitForTx(tx1.id);
+        const verify2 = invokeScript({
+            fee: 900000, 
+            dApp: address(accounts.Deployer), 
+            call:{function:"vote", 
+                args:[
+                    {
+                    "type": "string", 
+                    "value": nameURL
+                    }
+                ]}
+            }, accounts.SeedVote2)
+        await broadcast(verify2)
+        await waitForTx(verify2.id)
+        data = await accountDataByKey(nameURL + "_status", address(accounts.Deployer))
+        expect(data.value).equal("VOTING")
 
-        let data = await accountDataByKey(`${nameURL}_status`, address(accounts.Deployer));
-        expect(data.value).equal('VOTING');
-
-        const tx2 = invokeScript({
-            fee: 900000,
-            dApp: address(accounts.Deployer),
-            call: {
-                function: 'vote',
-                args: [{
-                    'type': 'string',
-                    'value': nameURL,
-                }],
-            },
-        }, accounts.SeedVote2);
-
-        await broadcast(tx2);
-        await waitForTx(tx2.id);
-
-        data = await accountDataByKey(`${nameURL}_status`, address(accounts.Deployer));
-        expect(data.value).equal('VOTING');
-
-        const tx3 = invokeScript({
-            fee: 900000,
-            dApp: address(accounts.Deployer),
-            call: {
-                function: 'vote',
-                args: [{
-                    'type': 'string',
-                    'value': nameURL,
-                }],
+        const verify3 = invokeScript({
+            fee: 900000, 
+            dApp: address(accounts.Deployer), 
+            call:{function:"vote", 
+                args:[
+                    {
+                    "type": "string", 
+                    "value": nameURL
+                    }
+                ]
             },
         }, accounts.SeedVote3);
 
@@ -134,47 +131,41 @@ describe('test in testnet: verifycollection.ride', () => {
         expect(data.value).equal('VERIFY');
     });
 
-    it('Test func removeVoting(address: String)', async () => {
-        const tx = invokeScript({
-            fee: 900000,
-            dApp: address(accounts.Deployer),
-            call: {
-                function: 'removeVoting',
-                args: [{
-                    'type': 'string',
-                    'value': '3N7yQLHUBnWxogAKAkdYyx11gz8X7PWfAnH',
-                }],
-            },
-        }, accounts.Deployer);
+    xit('Test func removeVoting(address: String)', async () => {
+        const verify1 = invokeScript({
+            fee: 900000, 
+            dApp: address(accounts.Deployer), 
+            call:{function:"removeVoting", 
+                args:[
+                    {
+                    "type": "string", 
+                    "value": "3N7yQLHUBnWxogAKAkdYyx11gz8X7PWfAnH"
+                    }
+                ]}
+            }, accounts.Deployer)
+        await broadcast(verify1)
+        await waitForTx(verify1.id)
+        data = await accountDataByKey("voting_member", address(accounts.Deployer))
+        expect(data.value).equal(address(accounts.SeedVote1) + ',' + address(accounts.SeedVote2) + ',' + address(accounts.SeedVote3))   
 
-        await broadcast(tx);
-        await waitForTx(tx.id);
+    })
 
-        const data = await accountDataByKey('voting_member', address(accounts.Deployer));
-
-        expect(data.value).equal(`${address(accounts.SeedVote1)},${address(accounts.SeedVote2)},${address(accounts.SeedVote3)}`);
-    });
-
-    it('Test func addVoting(address: String)', async () => {
-        const voties = `3N7yQLHUBnWxogAKAkdYyx11gz8X7PWfAnH,${address(accounts.SeedVote1)},${address(accounts.SeedVote2)},${address(accounts.SeedVote3)}`;
-
-        const tx = invokeScript({
-            fee: 900000,
-            dApp: address(accounts.Deployer),
-            call: {
-                function: 'addVoting',
-                args: [{
-                    'type': 'string',
-                    'value': '3N7yQLHUBnWxogAKAkdYyx11gz8X7PWfAnH',
-                }],
-            },
-        }, accounts.Deployer);
-
-        await broadcast(tx);
-        await waitForTx(tx.id);
-
-        data = await accountDataByKey('voting_member', address(accounts.Deployer));
-
-        expect(data.value).equal(voties);
-    });
-});
+    xit('Test func addVoting(address: String)', async () => {
+        const Voties = "3N7yQLHUBnWxogAKAkdYyx11gz8X7PWfAnH" + ',' + address(accounts.SeedVote1) + ',' + address(accounts.SeedVote2) + ',' + address(accounts.SeedVote3)
+        const verify1 = invokeScript({
+            fee: 900000, 
+            dApp: address(accounts.Deployer), 
+            call:{function:"addVoting", 
+                args:[
+                    {
+                    "type": "string", 
+                    "value": "3N7yQLHUBnWxogAKAkdYyx11gz8X7PWfAnH"
+                    }
+                ]}
+            }, accounts.Deployer)
+        await broadcast(verify1)
+        await waitForTx(verify1.id)
+        data = await accountDataByKey("voting_member", address(accounts.Deployer))
+        expect(data.value).equal(Voties)
+    })
+})
